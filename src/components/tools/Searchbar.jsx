@@ -7,6 +7,10 @@ export default function Searchbar({ buscar }) {
   const handleSubmit = (e) => {
     e.preventDefault();
     if (buscar) buscar(query); // chama a funcao que vai buscar o local
+
+
+    const api = import.meta.env.VITE_MAPS_API_KEY;
+    console.log('API Key:', api);
   };
 
   return (
