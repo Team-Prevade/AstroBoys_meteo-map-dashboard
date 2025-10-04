@@ -1,16 +1,15 @@
+import L from 'leaflet';
+import markerIcon from 'leaflet/dist/images/marker-icon.png';
+import markerShadow from 'leaflet/dist/images/marker-shadow.png';
+import { useState } from 'react';
 import {
   MapContainer,
-  TileLayer,
   Marker,
   Popup,
+  TileLayer,
   useMapEvents,
-} from "react-leaflet";
-import { useState } from "react";
-import L from "leaflet";
-import markerIcon from "leaflet/dist/images/marker-icon.png";
-import markerShadow from "leaflet/dist/images/marker-shadow.png";
-import { useState } from "react";
-import { MapContainer, Marker, Popup, TileLayer, useMapEvents } from "react-leaflet";
+} from 'react-leaflet';
+import TemperatureChart from './Temperature';
 
 delete L.Icon.Default.prototype._getIconUrl;
 L.Icon.Default.mergeOptions({
@@ -32,7 +31,8 @@ export default function MapView({ onAreaClick }) {
 
   return (
     <div className="relative w-full h-[calc(100vh-6rem)]">
-     
+      {/* <TemperatureChart /> */}
+
       <MapContainer
         center={[0, 0]}
         zoom={2}
@@ -53,9 +53,9 @@ export default function MapView({ onAreaClick }) {
         {coords && (
           <Marker position={coords}>
             <Popup className="text-sm font-medium">
-              📍 <span className="text-blue-600">Lat:</span>{" "}
+              📍 <span className="text-blue-600">Lat:</span>{' '}
               {coords.lat.toFixed(3)} <br />
-              📍 <span className="text-blue-600">Lng:</span>{" "}
+              📍 <span className="text-blue-600">Lng:</span>{' '}
               {coords.lng.toFixed(3)}
             </Popup>
           </Marker>

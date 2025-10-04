@@ -1,3 +1,5 @@
+import TemperatureChart from './Temperature';
+
 export default function Sidebar({ coords, onClose }) {
   if (!coords) return null;
 
@@ -11,17 +13,20 @@ export default function Sidebar({ coords, onClose }) {
       </button>
 
       <h2 className="text-xl font-semibold mb-4">Detalhes da Área</h2>
-      <p><b>Latitude:</b> {coords.lat.toFixed(3)}</p>
-      <p><b>Longitude:</b> {coords.lng.toFixed(3)}</p>
+      <p>
+        <b>Latitude:</b> {coords.lat.toFixed(3)}
+      </p>
+      <p>
+        <b>Longitude:</b> {coords.lng.toFixed(3)}
+      </p>
 
       <div className="mt-6">
         <h3 className="font-bold mb-2">Dados Meteorológicos</h3>
         <ul className="space-y-1">
           <li>Temperatura média: 24°C</li>
-          <li>Min: 18°C  Max: 30°C</li>
+          <li>Min: 18°C Max: 30°C</li>
           <li>midade: 72%</li>
           <li>Velocidade do vento 40km/s</li>
-
         </ul>
         <p>Apenas Exemplo depois vamos passar os dados corretamente aqui</p>
       </div>
@@ -29,11 +34,10 @@ export default function Sidebar({ coords, onClose }) {
       <div className="mt-6">
         <h3 className="font-bold mb-2">Gráficos</h3>
         <div className="bg-gray-900 text-white h-40 rounded-2xl flex items-center justify-center">
-             <p >
-          (gráfico aqui futuramente)
-        </p>
+          <p>
+            (gráfico aqui futuramente)
+          </p>
         </div>
-       
       </div>
     </aside>
   );
