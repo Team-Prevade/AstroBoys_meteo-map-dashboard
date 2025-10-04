@@ -6,13 +6,14 @@ import Footer from "./components/Footer";
 
 export default function App() {
   const [coords, setCoords] = useState(null);
+  const [coordsAndData, setCoordsAndData] = useState(null);
 
   return (
     <div className="flex flex-col h-screen">
       <Header />
-      <div className="flex-1 relative">
-        <MapView onAreaClick={setCoords} />
-        <Sidebar coords={coords} onClose={() => setCoords(null)} />
+      <div className="flex-1">
+        <MapView onAreaClick={setCoords}  setCoordsAndData={setCoordsAndData}/>
+        <Sidebar coordsAndData={coordsAndData} onClose={() => setCoordsAndData(null)} />
       </div>
       <Footer />
     </div>

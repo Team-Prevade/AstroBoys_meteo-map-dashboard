@@ -1,9 +1,9 @@
-import { MapContainer, TileLayer, Marker, Popup, useMapEvents } from "react-leaflet";
-import { useState } from "react";
+import { MapContainer, TileLayer, Marker, Popup, useMap, useMapEvents } from "react-leaflet";
+import { useState, useEffect } from "react";
 import L from "leaflet";
 import markerIcon from "leaflet/dist/images/marker-icon.png";
 import markerShadow from "leaflet/dist/images/marker-shadow.png";
-
+import ModalConfirmarLocalizacao from "./ConfirmLocation";
 
 delete L.Icon.Default.prototype._getIconUrl;
 L.Icon.Default.mergeOptions({
@@ -20,15 +20,34 @@ function LocationMarker({ onSelect }) {
   return null;
 }
 
-export default function MapView({ onAreaClick }) {
+function MoveToLocation({ coords }) {
+  const map = useMap();
+  useEffect(() => {
+    if (coords) map.flyTo([coords.lat, coords.lng], 6, { duration: 1.5 });
+  }, [coords, map]);
+  return null;
+}
+
+export default function MapView({ onAreaClick, setCoordsAndData }) {
   const [coords, setCoords] = useState(null);
+  const [pendingCoords, setPendingCoords] = useState(null);
+  const [showModal, setShowModal] = useState(false);
+
+  const handleConfirmLocation = (confirmedCoords) => {
+    setShowModal(false)
+    setCoordsAndData(confirmedCoords);
+  };
 
   return (
     <div className="relative w-full h-[calc(100vh-6rem)]">
       
+
+      {/* Mapa */}
       <MapContainer
         center={[0, 0]}
         zoom={2}
+        maxZoom={18}
+        minZoom={3}
         className="h-full w-full rounded-xl shadow-lg overflow-hidden z-0"
       >
         <TileLayer
@@ -36,30 +55,51 @@ export default function MapView({ onAreaClick }) {
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         />
 
+        {/* Clicou no mapa → abre modal */}
         <LocationMarker
           onSelect={(latlng) => {
             setCoords(latlng);
+            setPendingCoords(latlng);
             if (onAreaClick) onAreaClick(latlng);
+            setCoordsAndData(null);
           }}
         />
 
         {coords && (
-          <Marker position={coords}>
-            <Popup className="text-sm font-medium">
-              📍 <span className="text-blue-600">Lat:</span> {coords.lat.toFixed(3)} <br />
-              📍 <span className="text-blue-600">Lng:</span> {coords.lng.toFixed(3)}
-            </Popup>
-          </Marker>
+          <>
+            <Marker position={coords}>
+              <Popup className="text-sm font-medium">
+                📍 <span className="text-blue-600">Lat:</span> {coords.lat.toFixed(3)} <br />
+                📍 <span className="text-blue-600">Lng:</span> {coords.lng.toFixed(3)}
+              </Popup>
+            </Marker>
+            <MoveToLocation coords={coords} />
+          </>
         )}
       </MapContainer>
 
-      
-      {coords && (
-        <div className="absolute bottom-4 left-1/2 -translate-x-1/2 bg-gray-900 text-white px-4 py-2 rounded-full shadow-lg text-sm flex items-center gap-3 animate-fadeIn">
+      {/* Coordenadas exibidas na parte inferior */}
+      {/* {coords && (
+        <div className="absolute bottom-6 left-1/2 -translate-x-1/2 bg-gray-900 text-white px-4 py-2 rounded-full shadow-lg text-sm flex items-center gap-3 animate-fadeIn">
           <span>🌍 Latitude: <b>{coords.lat.toFixed(3)}</b></span>
           <span>Longitude: <b>{coords.lng.toFixed(3)}</b></span>
         </div>
       )}
+ */}
+
+      {coords && (
+        <button onClick={() => setShowModal(true)} className="absolute bottom-6 left-10 -translate-x-2 bg-gray-900 text-white px-4 py-2 rounded-full shadow-lg text-sm flex items-center gap-3 animate-fadeIn">
+          Confirmar Localização
+        </button>
+      )}
+
+      {/* ✅ Modal de confirmação */}
+      <ModalConfirmarLocalizacao
+        isOpen={showModal}
+        onClose={() => setShowModal(false)}
+        onConfirm={handleConfirmLocation}
+        coords={pendingCoords}
+      />
     </div>
   );
 }
