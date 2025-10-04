@@ -1,14 +1,20 @@
-import './App.css'
+import { useState } from "react";
+import Header from "./components/Header";
+import MapView from "./components/Map";
+import Sidebar from "./components/Sidebar";
+import Footer from "./components/Footer";
 
-function App() {
+export default function App() {
+  const [coords, setCoords] = useState(null);
 
   return (
-    <>
-      <h1 className= "align-center text-2xl justify-center text-blue-500 h-center">
-        Hello Time
-      </h1>
-    </>
-  )
+    <div className="flex flex-col h-screen">
+      <Header />
+      <div className="flex-1 relative">
+        <MapView onAreaClick={setCoords} />
+        <Sidebar coords={coords} onClose={() => setCoords(null)} />
+      </div>
+      <Footer />
+    </div>
+  );
 }
-
-export default App
