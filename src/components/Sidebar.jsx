@@ -20,7 +20,7 @@ export default function Sidebar({ coordsAndData, onClose }) {
         const { coords, date } = coordsAndData;
         const [year, month, day] = date.split("-");
 
-        const url = `https://delois-sandlike-widely.ngrok-free.dev/api/weather/previsao?lat=${coords.lat}&lon=${coords.lng}&day=${day}&month=${month}&year=${year}`;
+        const url = `4`;
 
         const response = await fetch(url, {
           headers: {
