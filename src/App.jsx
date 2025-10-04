@@ -1,8 +1,8 @@
-import { useState } from "react";
-import Header from "./components/Header";
-import MapView from "./components/Map";
-import Sidebar from "./components/Sidebar";
-import Footer from "./components/Footer";
+import { useState } from 'react';
+import Footer from './components/Footer';
+import Header from './components/Header';
+import MapView from './components/Map';
+import Sidebar from './components/Sidebar';
 
 export default function App() {
   const [coords, setCoords] = useState(null);

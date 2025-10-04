@@ -1,5 +1,5 @@
-import NasaLogo from "../assets/logo/NASA_logo.width-580.png";
-import SearchBar from "./tools/Searchbar";
+import NasaLogo from '../assets/logo/NASA_logo.width-580.png';
+import SearchBar from './tools/Searchbar';
 
 export default function Header() {
   return (

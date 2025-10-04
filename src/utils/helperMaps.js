@@ -1,84 +1,71 @@
-// utils/googleMaps.js
-const API_KEY = import.meta.env.VITE_MAPS_API_KEY;
+const normalizeQuery = (q) =>
+  q
+    .normalize('NFD')
+    .replace(/\p{Diacritic}/gu, '')
+    .replace(/\s+/g, ' ')
+    .trim();
 
-if (!API_KEY) {
-  throw new Error(
-    'Chave da API do Google Maps não encontrada. Defina VITE_MAPS_API_KEY no seu arquivo .env.'
-  );
-}
+const VITE_MAPS_API_KEY = import.meta.env.VITE_MAPS_API_KEY;
 
-const BASE_URL = 'https://maps.googleapis.com/maps/api/geocode/json';
-
-/**
- * Função genérica para fazer chamadas à API de Geocoding do Google.
- * @param {Object} params - Parâmetros da requisição (ex: address, latlng).
- * @returns {Array|null} Resultados da API ou null em caso de falha.
- */
-async function fetchGeocode(params) {
-  const url = new URL(BASE_URL);
-  Object.entries(params).forEach(([key, value]) =>
-    url.searchParams.append(key, value)
-  );
-  url.searchParams.append('key', API_KEY);
-
+export const searchAddress = async ({ address }) => {
+  const raw = address;
+  if (!raw.trim()) return;
+  const q = normalizeQuery(raw);
   try {
-    const response = await fetch(url.toString());
+    const url = `https://api.opencagedata.com/geocode/v1/json?q=${encodeURIComponent(
+      q
+    )}&key=${VITE_MAPS_API_KEY}&no_annotations=1&language=pt-BR`;
 
-    if (!response.ok) {
-      throw new Error(`Erro HTTP ${response.status}`);
+    const response = await fetch(url);
+    if (!response.ok) throw new Error('Falha na requisição');
+    const data = await response.json();
+    if (data.status && data.status.code !== 200) {
+      throw new Error(data.status.message || 'Erro da API');
     }
+
+    const rr = searchAddress(raw);
+    if (!rr) return;
+
+    console.log('Resultados da busca:', rr);
+
+    const mapped = (data.results || []).map((r) => ({
+      formatted_address: r.formatted,
+      location: { lat: r.geometry?.lat, lng: r.geometry?.lng },
+      type: r.components?._type || r.components?.category || 'desconhecido',
+    }));
+    return mapped;
+  } catch (err) {
+    console.error('Erro na busca:', err);
+  }
+};
+
+export const reverseGeocode = async (lat, lng) => {
+  try {
+    const query = `${lat},${lng}`;
+    const url = `https://api.opencagedata.com/geocode/v1/json?q=${encodeURIComponent(
+      query
+    )}&key=${VITE_MAPS_API_KEY}&no_annotations=1&language=pt-BR`;
+
+    const response = await fetch(url);
+    if (!response.ok) throw new Error('Falha na requisição');
 
     const data = await response.json();
-
-    if (data.status !== 'OK') {
-      console.warn(
-        `Erro da API de Geocoding: ${data.status}`,
-        data.error_message || ''
-      );
-      return null;
+    if (data.status && data.status.code !== 200) {
+      throw new Error(data.status.message || 'Erro da API');
     }
 
-    return data.results;
-  } catch (error) {
-    console.error('Falha ao buscar dados na API de Geocoding:', error);
-    return null;
+    // Mapeia os resultados de forma similar à sua função existente
+    const mapped = (data.results || []).map((r) => ({
+      formatted_address: r.formatted,
+      location: { lat: r.geometry?.lat, lng: r.geometry?.lng },
+      type: r.components?._type || r.components?.category || 'desconhecido',
+    }));
+
+    return mapped;
+  } catch (err) {
+    console.error('Erro na busca reversa:', err);
+    return [
+      { error: 'Não foi possível obter o endereço para essas coordenadas.' },
+    ];
   }
-}
-
-/**
- * Busca coordenadas a partir de um endereço (Geocoding).
- * @param {string} address - Endereço em formato de texto.
- * @returns {Array} Lista de objetos com endereço formatado e coordenadas.
- */
-export async function searchAddress(address) {
-  if (!address) {
-    throw new Error('A função searchAddress precisa de um endereço válido.');
-  }
-
-  const results = await fetchGeocode({ address: encodeURIComponent(address) });
-
-  return results
-    ? results.map((result) => ({
-        formattedAddress: result.formatted_address,
-        latitude: result.geometry.location.lat,
-        longitude: result.geometry.location.lng,
-      }))
-    : [];
-}
-
-/**
- * @param {number} lat - Latitude.
- * @param {number} lng - Longitude.
- * @returns {string|null} Endereço formatado ou null se não encontrado.
- */
-export async function reverseGeocode(lat, lng) {
-  if (typeof lat !== 'number' || typeof lng !== 'number') {
-    throw new Error(
-      'A função reverseGeocode precisa de latitude e longitude numéricas.'
-    );
-  }
-
-  const results = await fetchGeocode({ latlng: `${lat},${lng}` });
-
-  return results?.[0]?.formatted_address || null;
-}
+};
