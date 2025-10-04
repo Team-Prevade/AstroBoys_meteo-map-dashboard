@@ -12,7 +12,7 @@ export default function Header() {
         </h1>
       </div>
       
-{/* vanilson */}
+
       
       <div className="w-full md:w-auto">
         <SearchBar />
