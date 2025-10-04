@@ -1,5 +1,5 @@
 export default function Sidebar({ coords, onClose }) {
-  if (!coords) return null;
+  if (true) return null;
 
   return (
     <aside className="fixed right-0 top-0 h-full w-80 bg-white shadow-lg p-5 overflow-y-auto z-50">
@@ -11,8 +11,8 @@ export default function Sidebar({ coords, onClose }) {
       </button>
 
       <h2 className="text-xl font-semibold mb-4">Detalhes da Área</h2>
-      <p><b>Latitude:</b> {coords.lat.toFixed(3)}</p>
-      <p><b>Longitude:</b> {coords.lng.toFixed(3)}</p>
+      <p><b>Latitude:</b> {coords.lat}</p>
+      <p><b>Longitude:</b> {coords.lng}</p>
 
       <div className="mt-6">
         <h3 className="font-bold mb-2">Dados Meteorológicos</h3>

@@ -9,9 +9,9 @@ export default function App() {
 
   return (
     <div className="flex flex-col h-screen">
-      <Header />
+      <Header setCoords={setCoords}/>
       <div className="flex-1 relative">
-        <MapView onAreaClick={setCoords} />
+        <MapView onAreaClick={setCoords} coords={coords} setCoords={setCoords} />
         <Sidebar coords={coords} onClose={() => setCoords(null)} />
       </div>
       <Footer />
