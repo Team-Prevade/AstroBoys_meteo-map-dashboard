@@ -4,8 +4,9 @@ import L from "leaflet";
 import markerIcon from "leaflet/dist/images/marker-icon.png";
 import markerShadow from "leaflet/dist/images/marker-shadow.png";
 import ModalConfirmarLocalizacao from "./ConfirmLocation";
+import ChatBotFlutuante from "./chat";
 
-delete L.Icon.Default.prototype._getIconUrl;
+
 L.Icon.Default.mergeOptions({
   iconUrl: markerIcon,
   shadowUrl: markerShadow,
@@ -23,13 +24,16 @@ function LocationMarker({ onSelect }) {
 function MoveToLocation({ coords }) {
   const map = useMap();
   useEffect(() => {
-    if (coords) map.flyTo([coords.lat, coords.lng], 6, { duration: 1.5 });
+    if (coords && isFinite(coords.lat) && isFinite(coords.lng)) {
+      let zoom = map.getZoom()
+      if (zoom < 10) zoom = 13;
+  map.flyTo([coords.lat, coords.lng], zoom, { duration: 1.5 });
+}
   }, [coords, map]);
   return null;
 }
 
-export default function MapView({ onAreaClick, setCoordsAndData }) {
-  const [coords, setCoords] = useState(null);
+export default function MapView({ onAreaClick, setCoordsAndData, setCoords, coords }) {
   const [pendingCoords, setPendingCoords] = useState(null);
   const [showModal, setShowModal] = useState(false);
 
@@ -100,6 +104,10 @@ export default function MapView({ onAreaClick, setCoordsAndData }) {
         onConfirm={handleConfirmLocation}
         coords={pendingCoords}
       />
+
+      <div className="absolute bottom-6 left-200 -translate-x-2 px-4 py-2 rounded-full shadow-lg text-sm flex items-center gap-3 animate-fadeIn">
+        <ChatBotFlutuante Loc={coords} />
+      </div>
     </div>
   );
 }

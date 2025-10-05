@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { FaSearch } from "react-icons/fa";
 
-export default function Searchbar({ onSelect }) {
+export default function Searchbar({ onSelect, setCoords, coords }) {
   const [query, setQuery] = useState("");
   const [resultados, setResultados] = useState([]);
   const [isFocused, setIsFocused] = useState(false);
@@ -65,11 +65,11 @@ export default function Searchbar({ onSelect }) {
               onMouseDown={() => {
                 setQuery(item.display_name);
                 setResultados([]);
+                setQuery("")
                 if (onSelect)
                   onSelect({
-                    name: item.display_name,
                     lat: parseFloat(item.lat),
-                    lon: parseFloat(item.lon),
+                    lng: parseFloat(item.lon),
                   });
               }}
             >

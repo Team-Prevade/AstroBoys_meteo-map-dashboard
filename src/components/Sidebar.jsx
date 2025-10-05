@@ -1,7 +1,10 @@
 import { useEffect, useState } from "react";
-import { X, Loader2, AlertCircle } from "lucide-react";
+import { X, Loader2, AlertCircle, Download } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { gerarMensagemClimatica } from "../utils/weatherText";
+import TemperatureChart from "./Temperaute";
+import jsPDF from "jspdf";
+import html2canvas from "html2canvas";
 
 export default function Sidebar({ coordsAndData, onClose }) {
   const [loading, setLoading] = useState(true);
@@ -20,7 +23,7 @@ export default function Sidebar({ coordsAndData, onClose }) {
         const { coords, date } = coordsAndData;
         const [year, month, day] = date.split("-");
 
-        const url = `4`;
+        const url = `https://weatherapi01-4cd4d3b639c9.herokuapp.com/api/weather/previsao?lat=${coords.lat}&lon=${coords.lng}&day=${day}&month=${month}&year=${year}`;
 
         const response = await fetch(url, {
           headers: {
@@ -68,6 +71,67 @@ export default function Sidebar({ coordsAndData, onClose }) {
       })
     : null;
 
+  const metrics = [
+    {
+      label: "Tempe. média",
+      suffix: "°C",
+    },
+    {
+      label: "Prec. média",
+      suffix: "mm",
+    },
+    {
+      label: "Vento médio",
+      suffix: "km/h",
+    },
+  ];
+
+  // 📄 Função para gerar o PDF (incluindo o gráfico)
+  const gerarPDF = () => {
+    if (!dados) return alert("Não há dados para gerar o PDF.");
+
+    const pdf = new jsPDF("p", "mm", "a4");
+    let y = 10;
+
+    pdf.setFontSize(16);
+    pdf.text("Relatório Meteorológico", 105, y, { align: "center" });
+    y += 10;
+
+    pdf.setFontSize(12);
+    pdf.text(`Data: ${coordsAndData.date}`, 10, y);
+    y += 7;
+    pdf.text(`Latitude: ${coordsAndData.coords.lat.toFixed(3)}`, 10, y);
+    y += 7;
+    pdf.text(`Longitude: ${coordsAndData.coords.lng.toFixed(3)}`, 10, y);
+    y += 10;
+
+    if (mensagemClima) {
+      pdf.setFontSize(12);
+      pdf.text("Mensagem Climática:", 10, y);
+      y += 7;
+
+      const splitText = pdf.splitTextToSize(mensagemClima, 180);
+      pdf.text(splitText, 10, y);
+      y += splitText.length * 7 + 5;
+    }
+
+    pdf.setFontSize(12);
+    pdf.text("Médias Meteorológicas:", 10, y);
+    y += 7;
+
+    pdf.text(`🌡️ Temperatura média: ${medias?.temp?.toFixed(1) ?? "--"} °C`, 10, y);
+    y += 7;
+    pdf.text(`💧 Precipitação média: ${medias?.prec?.toFixed(2) ?? "--"} mm`, 10, y);
+    y += 7;
+    pdf.text(`🌬️ Vento médio: ${medias?.vento?.toFixed(1) ?? "--"} km/h`, 10, y);
+    y += 10;
+
+    pdf.setFontSize(10);
+    pdf.text("*Dados obtidos da API meteorológica (LARC/NASA via proxy ngrok).", 10, y);
+
+    pdf.save("relatorio_meteorologico.pdf");
+  };
+
   return (
     <aside className="fixed right-0 top-[88px] h-[79.5vh] w-80 md:w-96 bg-white shadow-2xl p-6 overflow-y-auto z-50 transform transition-transform duration-300 ease-in-out animate-slideIn">
       <div className="flex justify-between items-center mb-6">
@@ -94,6 +158,9 @@ export default function Sidebar({ coordsAndData, onClose }) {
           <span className="font-semibold">Data:</span> {coordsAndData.date}
         </p>
       </div>
+
+      {/* Botão de download em PDF */}
+      
 
       {/* Conteúdo dinâmico */}
       <AnimatePresence mode="wait">
@@ -130,6 +197,7 @@ export default function Sidebar({ coordsAndData, onClose }) {
         ) : (
           <motion.div
             key="content"
+            className="sidebar-content"
             initial={{ opacity: 0, y: 15 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0 }}
@@ -164,7 +232,8 @@ export default function Sidebar({ coordsAndData, onClose }) {
                   <b>{medias?.prec?.toFixed(2) ?? "--"} mm</b>
                 </li>
                 <li>
-                  🌬️ Vento médio: <b>{medias?.vento?.toFixed(1) ?? "--"} km/h</b>
+                  🌬️ Vento médio:{" "}
+                  <b>{medias?.vento?.toFixed(1) ?? "--"} km/h</b>
                 </li>
               </ul>
 
@@ -173,13 +242,8 @@ export default function Sidebar({ coordsAndData, onClose }) {
               </p>
             </div>
 
-            <div className="mt-8">
-              <h3 className="text-lg font-semibold text-gray-800 mb-3">
-                Gráficos (em breve)
-              </h3>
-              <div className="bg-gradient-to-r from-blue-600 to-purple-600 text-white h-44 rounded-2xl flex items-center justify-center shadow-md">
-                <p className="text-sm opacity-80">Gráficos futuros aqui</p>
-              </div>
+            <div className="mt-8 no-scrollbar">
+              <TemperatureChart data={dados} />
             </div>
           </motion.div>
         )}

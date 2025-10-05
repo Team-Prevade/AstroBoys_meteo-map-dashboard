@@ -1,7 +1,7 @@
 import NasaLogo from "../assets/logo/NASA_logo.width-580.png";
 import SearchBar from "./tools/Searchbar";
 
-export default function Header() {
+export default function Header({ setCoords, coords }) {
   return (
     <header className=" top-0 z-50 bg-gray-900 text-white shadow-lg">
       <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between px-6 py-4 gap-4">
@@ -23,7 +23,7 @@ export default function Header() {
 
         
         <div className="w-full md:w-auto">
-          <SearchBar />
+          <SearchBar onSelect={setCoords} setCoords={setCoords} coords={coords}/>
         </div>
       </div>
     </header>
