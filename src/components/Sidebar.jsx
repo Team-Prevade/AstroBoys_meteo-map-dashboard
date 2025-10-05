@@ -87,49 +87,79 @@ export default function Sidebar({ coordsAndData, onClose }) {
   ];
 
   // 📄 Função para gerar o PDF (incluindo o gráfico)
-  const gerarPDF = () => {
+  const gerarPDF = async () => {
     if (!dados) return alert("Não há dados para gerar o PDF.");
-
     const pdf = new jsPDF("p", "mm", "a4");
-    let y = 10;
+    const margin = 15;
+    const pageWidth = pdf.internal.pageSize.getWidth();
+    const pageHeight = pdf.internal.pageSize.getHeight();
+    let y = margin;
 
-    pdf.setFontSize(16);
-    pdf.text("Relatório Meteorológico", 105, y, { align: "center" });
+    // Cabeçalho
+    pdf.setFontSize(18);
+    pdf.setTextColor(30, 41, 59);
+    pdf.text("Relatório de Previsão do Tempo", pageWidth / 2, y, { align: "center" });
     y += 10;
-
     pdf.setFontSize(12);
-    pdf.text(`Data: ${coordsAndData.date}`, 10, y);
-    y += 7;
-    pdf.text(`Latitude: ${coordsAndData.coords.lat.toFixed(3)}`, 10, y);
-    y += 7;
-    pdf.text(`Longitude: ${coordsAndData.coords.lng.toFixed(3)}`, 10, y);
-    y += 10;
+    pdf.setTextColor(71, 85, 105);
+    pdf.text("NASA MeteoMap", pageWidth / 2, y, { align: "center" });
+    y += 12;
 
+    // Localização e data
+    pdf.setFontSize(14);
+    pdf.setTextColor(30, 41, 59);
+    pdf.text("Localização e Data", margin, y);
+    y += 7;
+    pdf.setFontSize(11);
+    pdf.setTextColor(51, 65, 85);
+    pdf.text(`Latitude: ${coordsAndData.coords.lat.toFixed(3)}`, margin, y); y += 6;
+    pdf.text(`Longitude: ${coordsAndData.coords.lng.toFixed(3)}`, margin, y); y += 6;
+    pdf.text(`Data da Previsão: ${coordsAndData.date}`, margin, y); y += 10;
+
+    // Resumo Climático
     if (mensagemClima) {
-      pdf.setFontSize(12);
-      pdf.text("Mensagem Climática:", 10, y);
+      pdf.setFontSize(14);
+      pdf.setTextColor(30, 41, 59);
+      pdf.text("Resumo Climático", margin, y);
       y += 7;
-
-      const splitText = pdf.splitTextToSize(mensagemClima, 180);
-      pdf.text(splitText, 10, y);
-      y += splitText.length * 7 + 5;
+      pdf.setFontSize(11);
+      pdf.setTextColor(51, 65, 85);
+      const split = pdf.splitTextToSize(mensagemClima, pageWidth - margin * 2);
+      pdf.text(split, margin, y);
+      y += split.length * 6 + 10;
     }
 
-    pdf.setFontSize(12);
-    pdf.text("Médias Meteorológicas:", 10, y);
+    // Médias
+    pdf.setFontSize(14);
+    pdf.setTextColor(30, 41, 59);
+    pdf.text("Médias Meteorológicas", margin, y);
     y += 7;
+    pdf.setFontSize(11);
+    pdf.setTextColor(51, 65, 85);
+    pdf.text(`Temperatura média: ${medias?.temp?.toFixed(1) ?? "--"} °C`, margin, y); y += 6;
+    pdf.text(`Precipitação média: ${medias?.prec?.toFixed(2) ?? "--"} mm`, margin, y); y += 6;
+    pdf.text(`Vento médio: ${medias?.vento?.toFixed(1) ?? "--"} km/h`, margin, y); y += 10;
 
-    pdf.text(`🌡️ Temperatura média: ${medias?.temp?.toFixed(1) ?? "--"} °C`, 10, y);
-    y += 7;
-    pdf.text(`💧 Precipitação média: ${medias?.prec?.toFixed(2) ?? "--"} mm`, 10, y);
-    y += 7;
-    pdf.text(`🌬️ Vento médio: ${medias?.vento?.toFixed(1) ?? "--"} km/h`, 10, y);
-    y += 10;
+    // Gráfico (captura via html2canvas)
+    const chartEl = document.querySelector('.recharts-responsive-container');
+    if (chartEl) {
+      pdf.setFontSize(14);
+      pdf.setTextColor(30, 41, 59);
+      pdf.text("Gráfico de Previsão Horária", margin, y); y += 7;
+      const canvas = await html2canvas(chartEl, { scale: 2 });
+      const imgData = canvas.toDataURL('image/png');
+      const imgW = pageWidth - margin * 2;
+      const imgH = (canvas.height * imgW) / canvas.width;
+      if (y + imgH > pageHeight - margin) { pdf.addPage(); y = margin; }
+      pdf.addImage(imgData, 'PNG', margin, y, imgW, imgH); y += imgH + 8;
+    }
 
+    // Rodapé
     pdf.setFontSize(10);
-    pdf.text("*Dados obtidos da API meteorológica (LARC/NASA via proxy ngrok).", 10, y);
+    pdf.setTextColor(107, 114, 128);
+    pdf.text("Desenvolvido por ASTROBYTES — Dados da API meteorológica (LARC/NASA)", pageWidth/2, pageHeight - margin, { align: 'center' });
 
-    pdf.save("relatorio_meteorologico.pdf");
+    pdf.save('relatorio_meteorologico.pdf');
   };
 
   return (
@@ -160,7 +190,11 @@ export default function Sidebar({ coordsAndData, onClose }) {
       </div>
 
       {/* Botão de download em PDF */}
-      
+      <div className="mb-6">
+        <button onClick={gerarPDF} className="btn btn-primary w-full">
+          <Download className="h-5 w-5" /> Baixar Relatório (PDF)
+        </button>
+      </div>
 
       {/* Conteúdo dinâmico */}
       <AnimatePresence mode="wait">
