@@ -6,12 +6,13 @@ import Sidebar from './components/Sidebar';
 
 export default function App() {
   const [coords, setCoords] = useState(null);
+  const [data, setData] = useState(null);
 
   return (
     <div className="flex flex-col h-screen">
-      <Header />
+      <Header setData={setData} />
       <div className="flex-1 relative">
-        <MapView onAreaClick={setCoords} />
+        <MapView onAreaClick={setCoords} data={data} />
         <Sidebar coords={coords} onClose={() => setCoords(null)} />
       </div>
       <Footer />

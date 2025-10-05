@@ -1,18 +1,34 @@
-import { useState } from "react";
-import { FaSearch } from "react-icons/fa";
+import { useState } from 'react';
+import { FaSearch } from 'react-icons/fa';
+import { searchAddress } from '../../utils/helperMaps';
 
-export default function Searchbar({ buscar }) {
-  const [query, setQuery] = useState("");
-  const [error, setError] = useState("");
+export default function Searchbar({ setData }) {
+  const [query, setQuery] = useState('');
+  const [error, setError] = useState('');
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    if (query.trim() === "") {
-      setError("Digite algo antes de pesquisar!");
+    if (query.trim() === '') {
+      setError('Digite algo antes de pesquisar!');
     } else {
-      setError("");
-      if (buscar) buscar(query);
-      console.log("🔎 Pesquisando:", query);
+      setError('');
+      try {
+        const results = await searchAddress({
+          address: query,
+          language: 'pt-BR',
+          limit: 5,
+        });
+
+        if (results.length === 0) {
+          setError('Nenhum resultado encontrado para essa pesquisa.');
+        } else {
+          console.log('Resultados da Geoapify:', results);
+          setData(results);
+        }
+      } catch (err) {
+        console.error(err);
+        setError('Erro ao buscar o endereço. Tente novamente.');
+      }
     }
   };
 

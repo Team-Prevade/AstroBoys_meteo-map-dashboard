@@ -261,7 +261,8 @@ const CustomTooltip = ({ active, payload, label }) => {
   );
 };
 
-const TemperatureChart = ({ data }) => {
+const TemperatureChart = ({ data, variant = 'default' }) => {
+  const isCompact = variant === 'compact';
   const [apiData, setApiData] = useState(null);
   const [fetchState, setFetchState] = useState({ loading: false, error: null });
 
@@ -348,14 +349,33 @@ const TemperatureChart = ({ data }) => {
     },
   ];
 
+  const containerClasses = `mb-5 rounded-lg bg-[#1e2746] text-white ${
+    isCompact ? 'p-3' : 'p-4'
+  }`;
+  const headerClasses = `${
+    isCompact ? 'mb-3' : 'mb-4'
+  } flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between`;
+
   return (
-    <div className="mb-5 rounded-lg bg-[#1e2746] p-4 text-white">
-      <div className="mb-4 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+    <div className={containerClasses}>
+      <div className={headerClasses}>
         <div>
-          <h3 className="text-lg font-medium">Previsão de temperatura</h3>
-          <p className="text-sm capitalize text-white/70">{dateLabel}</p>
+          <h3 className={`${isCompact ? 'text-base' : 'text-lg'} font-medium`}>
+            Previsão de temperatura
+          </h3>
+          <p
+            className={`${
+              isCompact ? 'text-xs' : 'text-sm'
+            } capitalize text-white/70`}
+          >
+            {dateLabel}
+          </p>
         </div>
-        <div className="flex flex-wrap items-center gap-3 text-xs text-white/60">
+        <div
+          className={`flex flex-wrap items-center ${
+            isCompact ? 'gap-2 text-[11px]' : 'gap-3 text-xs'
+          } text-white/60`}
+        >
           {infoSource?.inputs?.lat && infoSource?.inputs?.lon && (
             <span>
               Lat: {Number(infoSource.inputs.lat).toFixed(3)} | Lon:{' '}
@@ -375,18 +395,38 @@ const TemperatureChart = ({ data }) => {
         </div>
       </div>
 
-      <div className="mb-4 grid gap-3 text-sm sm:grid-cols-3">
+      <div
+        className={
+          isCompact
+            ? 'mb-3 grid grid-cols-2 gap-2 text-xs'
+            : 'mb-4 grid gap-3 text-sm sm:grid-cols-3'
+        }
+      >
         {metrics.map((metric) => (
           <div
             key={metric.label}
-            className="rounded-md bg-white/5 p-3 text-center backdrop-blur-sm"
+            className={`rounded-md bg-white/5 text-center backdrop-blur-sm ${
+              isCompact ? 'p-2' : 'p-3'
+            }`}
           >
-            <p className="text-xs uppercase tracking-wide text-white/60">
+            <p
+              className={`${
+                isCompact ? 'text-[11px]' : 'text-xs'
+              } uppercase tracking-wide text-white/60`}
+            >
               {metric.label}
             </p>
-            <p className="mt-1 text-lg font-semibold text-white">
+            <p
+              className={`${
+                isCompact ? 'mt-1 text-base' : 'mt-1 text-lg'
+              } font-semibold text-white`}
+            >
               {metric.value != null ? metric.value.toFixed(1) : '--'}
-              <span className="ml-1 text-sm text-white/60">
+              <span
+                className={`${
+                  isCompact ? 'ml-1 text-xs' : 'ml-1 text-sm'
+                } text-white/60`}
+              >
                 {metric.suffix}
               </span>
             </p>
@@ -396,18 +436,39 @@ const TemperatureChart = ({ data }) => {
 
       {chartRows.length > 0 && (
         <div className="no-scrollbar mb-3 overflow-x-auto">
-          <div className="flex min-w-max gap-4 px-4">
+          <div
+            className={`flex min-w-max ${
+              isCompact ? 'gap-3 px-2' : 'gap-4 px-4'
+            }`}
+          >
             {chartRows.map((item) => (
               <div
                 key={`slot-${item.id}`}
-                className="flex w-14 flex-col items-center gap-2 text-center"
+                className={`flex flex-col items-center text-center ${
+                  isCompact ? 'w-12 gap-1' : 'w-14 gap-2'
+                }`}
               >
-                <span className="text-xs text-[#aaaaaa]">{item.hourLabel}</span>
+                <span
+                  className={`${
+                    isCompact ? 'text-[11px]' : 'text-xs'
+                  } text-[#aaaaaa]`}
+                >
+                  {item.hourLabel}
+                </span>
                 {hasConditions ? (
                   item.condition ? (
-                    <WeatherIcon condition={item.condition} />
+                    <WeatherIcon
+                      condition={item.condition}
+                      size={isCompact ? 'compact' : 'default'}
+                    />
                   ) : (
-                    <span className="text-xs text-white/50">--</span>
+                    <span
+                      className={`${
+                        isCompact ? 'text-[11px]' : 'text-xs'
+                      } text-white/50`}
+                    >
+                      --
+                    </span>
                   )
                 ) : null}
               </div>
@@ -416,12 +477,17 @@ const TemperatureChart = ({ data }) => {
         </div>
       )}
 
-      <div className="h-[220px]">
+      <div className={isCompact ? 'h-[180px]' : 'h-[220px]'}>
         {chartRows.length ? (
           <ResponsiveContainer width="100%" height="100%">
             <ComposedChart
               data={chartRows}
-              margin={{ top: 10, right: 30, left: 30, bottom: 0 }}
+              margin={{
+                top: isCompact ? 6 : 10,
+                right: isCompact ? 20 : 30,
+                left: isCompact ? 20 : 30,
+                bottom: 0,
+              }}
             >
               <defs>
                 <linearGradient id="tempGradient" x1="0" y1="0" x2="0" y2="1">
@@ -432,34 +498,34 @@ const TemperatureChart = ({ data }) => {
               <CartesianGrid strokeDasharray="3 3" stroke="#334166" />
               <XAxis
                 dataKey="hourLabel"
-                tick={{ fill: '#aaaaaa', fontSize: 12 }}
+                tick={{ fill: '#aaaaaa', fontSize: isCompact ? 11 : 12 }}
                 axisLine={{ stroke: '#334166' }}
               />
               <YAxis
                 yAxisId="temp"
                 domain={tempDomain}
-                tick={{ fill: '#aaaaaa', fontSize: 12 }}
+                tick={{ fill: '#aaaaaa', fontSize: isCompact ? 11 : 12 }}
                 axisLine={{ stroke: '#334166' }}
                 label={{
                   value: 'Temperatura (°C)',
                   angle: -90,
                   position: 'insideLeft',
                   fill: '#aaaaaa',
-                  dx: -10,
+                  dx: isCompact ? -6 : -10,
                 }}
               />
               <YAxis
                 yAxisId="precip"
                 orientation="right"
                 domain={[0, Math.ceil(precipWindMax + 0.5)]}
-                tick={{ fill: '#aaaaaa', fontSize: 12 }}
+                tick={{ fill: '#aaaaaa', fontSize: isCompact ? 11 : 12 }}
                 axisLine={{ stroke: '#334166' }}
                 label={{
                   value: 'Precipitação / Vento',
                   angle: 90,
                   position: 'insideRight',
                   fill: '#aaaaaa',
-                  dx: 10,
+                  dx: isCompact ? 6 : 10,
                 }}
               />
               <Tooltip
@@ -493,13 +559,23 @@ const TemperatureChart = ({ data }) => {
             </ComposedChart>
           </ResponsiveContainer>
         ) : (
-          <div className="flex h-full items-center justify-center text-sm text-white/60">
+          <div
+            className={
+              isCompact
+                ? 'flex h-full items-center justify-center text-xs text-white/60'
+                : 'flex h-full items-center justify-center text-sm text-white/60'
+            }
+          >
             Nenhuma previsão disponível para exibir.
           </div>
         )}
       </div>
 
-      <div className="mt-3 flex flex-wrap gap-4 text-sm">
+      <div
+        className={`flex flex-wrap ${
+          isCompact ? 'mt-2 gap-3 text-xs' : 'mt-3 gap-4 text-sm'
+        }`}
+      >
         <div className="flex items-center">
           <span className="mr-2 inline-block h-3 w-3 rounded-full bg-[#FF8E50]" />
           <span>Temperatura (°C)</span>

@@ -33,11 +33,7 @@ export default function Sidebar({ coords, onClose }) {
 
       <div className="mt-6">
         <h3 className="font-bold mb-2">Gráficos</h3>
-        <div className="bg-gray-900 text-white h-40 rounded-2xl flex items-center justify-center">
-          <p>
-            (gráfico aqui futuramente)
-          </p>
-        </div>
+        <TemperatureChart variant="compact" />
       </div>
     </aside>
   );

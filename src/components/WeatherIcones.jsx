@@ -12,11 +12,13 @@ const WEATHER_ICON_BY_CONDITION = {
 /**
  * Ícone meteorológico representado por um emoji.
  */
-export const WeatherIcon = ({ condition }) => {
+export const WeatherIcon = ({ condition, size = 'default' }) => {
   const icon = WEATHER_ICON_BY_CONDITION[condition] ?? '☁️';
+  const sizeClasses =
+    size === 'compact' ? 'h-5 w-5 text-lg' : 'h-6 w-6 text-xl';
   return (
     <span
-      className="inline-flex h-6 w-6 items-center justify-center text-xl"
+      className={`inline-flex items-center justify-center ${sizeClasses}`}
       role="img"
       aria-label={condition || 'cloudy'}
     >
