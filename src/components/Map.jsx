@@ -9,7 +9,6 @@ import ChatBotFlutuante from "./chat";
 
 L.Icon.Default.mergeOptions({
   iconUrl: markerIcon,
-  shadowUrl: markerShadow,
 });
 
 function LocationMarker({ onSelect }) {
@@ -36,11 +35,37 @@ function MoveToLocation({ coords }) {
 export default function MapView({ onAreaClick, setCoordsAndData, setCoords, coords }) {
   const [pendingCoords, setPendingCoords] = useState(null);
   const [showModal, setShowModal] = useState(false);
+  const [address, setAddress] = useState(null);
 
   const handleConfirmLocation = (confirmedCoords) => {
     setShowModal(false)
+    setCoords(confirmedCoords.coords)
     setCoordsAndData(confirmedCoords);
   };
+
+  useEffect(() => {
+    if (!coords?.lat || !coords?.lng) return;
+    /* setLoadingAddress(true); */
+    setAddress(null);
+
+    const fetchAddress = async () => {
+      try {
+        const res = await fetch(
+          `https://nominatim.openstreetmap.org/reverse?lat=${coords.lat}&lon=${coords.lng}&format=json`
+        );
+        const data = await res.json();
+        setAddress(data.display_name || "Endereço desconhecido");
+      } catch (error) {
+        console.error("Erro ao buscar endereço:", error);
+        setAddress("Não foi possível determinar o endereço");
+      } 
+      /* finally {
+        setLoadingAddress(false);
+      } */
+    };
+
+    fetchAddress();
+  }, [coords]);
 
   return (
     <div className="relative w-full h-[calc(100vh-6rem)]">
@@ -72,7 +97,8 @@ export default function MapView({ onAreaClick, setCoordsAndData, setCoords, coor
         {coords && (
           <>
             <Marker position={coords}>
-              <Popup className="text-sm font-medium">
+              <Popup className="text-sm font-medium" >
+                    <span>Endereço: {address ? address : "Endereço desconhecido"}</span><br />
                 📍 <span className="text-blue-600">Lat:</span> {coords.lat.toFixed(3)} <br />
                 📍 <span className="text-blue-600">Lng:</span> {coords.lng.toFixed(3)}
               </Popup>
