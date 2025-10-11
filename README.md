@@ -81,18 +81,6 @@ Apresentação do protótipo funcional, pitch final e demonstração em tempo re
 
 ---
 
-## 🧩 Arquitetura Simplificada
-
-```mermaid
-graph TD
-    A[Usuário] -->|Local + Data| B[Front-end (React)]
-    B --> C[API (Flask)]
-    C --> D[Modelo de Previsão]
-    D --> E[APIs Externas (NASA, OpenWeather)]
-    C --> F[Banco de Dados]
-    F --> B
- ```
-
 ## 🌍 Impacto
 
 > “E se pudéssemos prever o imprevisível?”
